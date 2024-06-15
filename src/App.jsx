@@ -14,19 +14,25 @@ function App() {
         async (previousState, formData) => {
             localStorage.setItem('userName', formData.get('userName'))
             localStorage.setItem('password', formData.get('password'))
-            const res = await fetch("http://localhost:3000"+formData.get("endpoint"), {
+            const url = formData.get("endpoint").includes('http') ? formData.get("endpoint") : "http://localhost:3000" + formData.get("endpoint");
+            await fetch(url, {
                 headers: {
                     "Content-Type": "application/json",
                     "user-name": formData.get("userName"),
                     "user-pass": formData.get("password"),
                 },
+            }).then(res => {
+                if (res.status === 200) {
+                    setResponse(res.text());
+                } else {
+                    setResponse(res.statusText);
+                    return res.statusText;
+                }
+            }).catch(() => {
+                setResponse('Error de conexión');
+                return 'Error de conexión'
             });
-            if (res.status === 200) {
-                setResponse(await res.text());
-            } else {
-                setResponse(res.statusText);
-                return res.statusText;
-            }
+
             return ''
         },
         '',
